@@ -1,41 +1,41 @@
 <template>
-    <div>
-      <form @submit.prevent="handleSubmit">
-        <div>
+    <div class="quote-form-container">
+      <form @submit.prevent="handleSubmit" class="quote-form">
+        <div class="form-group">
           <label>Number of Layers</label>
           <input type="number" v-model="formData.layers" required />
         </div>
-        <div>
+        <div class="form-group">
           <label>Thickness (mm)</label>
           <input type="number" v-model="formData.thickness" required />
         </div>
-        <div>
+        <div class="form-group">
           <label>Solder Mask Color</label>
           <input type="text" v-model="formData.solderMaskColor" required />
         </div>
-        <div>
+        <div class="form-group">
           <label>Surface Finish</label>
           <input type="text" v-model="formData.surfaceFinish" required />
         </div>
-        <div>
+        <div class="form-group">
           <label>Board Dimensions (mm)</label>
           <input type="text" v-model="formData.boardDimensions" required />
         </div>
-        <div>
+        <div class="form-group">
           <label>Quantity</label>
           <input type="number" v-model="formData.quantity" required />
         </div>
-        <div>
+        <div class="form-group">
           <label>Delivery Time (days)</label>
           <input type="number" v-model="formData.deliveryTime" required />
         </div>
-        <div>
+        <div class="form-group">
           <label>Upload Gerber File</label>
-          <input type="file" @change="handleFileChange" required />
+          <input type="file" @change="handleFileChange" />
         </div>
-        <button type="submit">Get Quote</button>
+        <button type="submit" class="submit-button">Get Quote</button>
       </form>
-      <div v-if="quote !== null">
+      <div v-if="quote !== null" class="quote-result">
         <h3>Quote: {{ quote }}</h3>
       </div>
     </div>
@@ -83,7 +83,59 @@
   };
   </script>
   
-  <style>
-  /* Add your styles here */
+  <style scoped>
+  .quote-form-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 2rem;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .quote-form {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .form-group {
+    margin-bottom: 1rem;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    color: #333;
+  }
+  
+  .form-group input {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+  
+  .submit-button {
+    padding: 0.75rem;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .submit-button:hover {
+    background-color: #0056b3;
+  }
+  
+  .quote-result {
+    margin-top: 2rem;
+    padding: 1rem;
+    background-color: #e9ecef;
+    border-radius: 4px;
+    text-align: center;
+  }
   </style>
   
