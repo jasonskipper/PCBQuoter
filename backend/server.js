@@ -1,45 +1,51 @@
 const express = require('express');
-const multer = require('multer');
-const fs = require('fs');
-const path = require('path');
+const bodyParser = require('body-parser');
+const cors = require('cors');
 
 const app = express();
-const upload = multer({ dest: 'uploads/' });
+const port = 3000;
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+app.use(cors()); // Enable CORS for all routes
 
-app.post('/api/get-quote', upload.single('gerberFile'), (req, res) => {
-  const {
-    layers,
-    thickness,
-    solderMaskColor,
-    surfaceFinish,
-    boardDimensions,
-    quantity,
-    deliveryTime,
-  } = req.body;
+app.post('/get-quote', (req, res) => {
+  try {
+    const { layers, thickness, boardDimensions, quantity, deliveryTime } = req.body;
 
-  const gerberFile = req.file;
+    // Calculate costs
+    const layerCost = 50; // $50 per layer
+    const thicknessCost = 10; // $10 per mm
+    const boardDimensionsCost = 0.05; // $0.05 per square mm
+    const quantityCost = 1; // $1 per unit
+    const rushFee = 20; // $20 per day if delivery time is less than 7 days
 
-  // Parse board dimensions from string (e.g., "100x200")
-  const [boardWidth, boardHeight] = boardDimensions.split('x').map(Number);
+    const [width, height] = boardDimensions.split('x').map(Number);
+    const area = width * height;
 
-  // Calculate cost (this is a simplified example)
-  const baseCost = boardWidth * boardHeight * layers * thickness * 0.1;
-  const colorCost = solderMaskColor.toLowerCase() !== 'green' ? 10 : 0;
-  const finishCost = surfaceFinish.toLowerCase() !== 'hasl' ? 15 : 0;
-  const quantityDiscount = Math.max(0, (quantity - 100) * 0.05);
-  const deliverySurcharge = Math.max(0, (10 - deliveryTime) * 5);
-  const totalCost = baseCost + colorCost + finishCost - quantityDiscount + deliverySurcharge;
+    let estimatedCost = (layers * layerCost) +
+                        (thickness * thicknessCost) +
+                        (area * boardDimensionsCost) +
+                        (quantity * quantityCost);
 
-  // Clean up the uploaded file
-  fs.unlinkSync(path.join(__dirname, gerberFile.path));
+    if (deliveryTime < 7) {
+      estimatedCost += (7 - deliveryTime) * rushFee;
+    }
 
-  res.json({ price: totalCost });
+    res.json({
+      layers,
+      thickness,
+      boardDimensions,
+      quantity,
+      deliveryTime,
+      estimatedCost: estimatedCost.toFixed(2)
+    });
+  } catch (error) {
+    console.error('Error processing request:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+app.listen(port, () => {
+  console.log(`Server is running on http://localhost:${port}`);
 });

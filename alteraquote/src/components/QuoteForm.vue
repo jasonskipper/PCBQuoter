@@ -29,14 +29,16 @@
           <label>Delivery Time (days)</label>
           <input type="number" v-model="formData.deliveryTime" required />
         </div>
-        <div class="form-group">
-          <label>Upload Gerber File</label>
-          <input type="file" @change="handleFileChange" />
-        </div>
         <button type="submit" class="submit-button">Get Quote</button>
       </form>
-      <div v-if="quote !== null" class="quote-result">
-        <h3>Quote: {{ quote }}</h3>
+      <div v-if="quote">
+        <h3>Quote</h3>
+        <p>Number of Layers: {{ quote.layers }}</p>
+        <p>Thickness: {{ quote.thickness }} mm</p>
+        <p>Board Dimensions: {{ quote.boardDimensions }} mm²</p>
+        <p>Quantity: {{ quote.quantity }}</p>
+        <p>Delivery Time: {{ quote.deliveryTime }} days</p>
+        <h4>Estimated Cost: ${{ quote.estimatedCost }}</h4>
       </div>
     </div>
   </template>
@@ -52,34 +54,31 @@
           surfaceFinish: '',
           boardDimensions: '',
           quantity: '',
-          deliveryTime: '',
-          gerberFile: null,
+          deliveryTime: ''
         },
-        quote: null,
+        quote: null
       };
     },
     methods: {
-      handleFileChange(event) {
-        this.formData.gerberFile = event.target.files[0];
-      },
       async handleSubmit() {
-        const data = new FormData();
-        Object.keys(this.formData).forEach((key) => {
-          data.append(key, this.formData[key]);
-        });
-  
         try {
-          const response = await fetch('http://localhost:3000/api/get-quote', {
+          const response = await fetch('http://localhost:3000/get-quote', {
             method: 'POST',
-            body: data,
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(this.formData)
           });
-          const result = await response.json();
-          this.quote = result.price;
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          const data = await response.json();
+          this.quote = data;
         } catch (error) {
           console.error('Error:', error);
         }
-      },
-    },
+      }
+    }
   };
   </script>
   
